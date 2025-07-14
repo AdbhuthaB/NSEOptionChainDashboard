@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OI Chart + Top Contributors</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+      display: flex;
+      gap: 40px;
+      padding: 20px;
+    }
+    #chart-container {
+      flex: 2;
+    }
+    #top-entities {
+      flex: 1;
+      max-width: 300px;
+    }
+    .entity-list {
+      list-style: none;
+      padding: 0;
+    }
+    .entity-list li {
+      background: #f5f5f5;
+      margin: 5px 0;
+      padding: 8px;
+      border-left: 4px solid #4caf50;
+    }
+  </style>
+</head>
+<body>
+  <div id="chart-container">
+    <canvas id="oiChart" width="800" height="400"></canvas>
+  </div>
+
+  <div id="top-entities">
+    <h3>Top Alert Contributors</h3>
+    <ul id="entityList" class="entity-list"></ul>
+  </div>
+
+  <script>
+    async function loadChartData() {
+      try {
+        const res = await fetch('http://127.0.0.1:5000/api/alerts');
+        const data = await res.json();
+
+        const topContributors = data.filter(item => item.type === 'Top OI Contributor');
+        const labels = topContributors.map(d => d.details.Strike);
+        const ceVolume = topContributors.map(d => d.details.CE_Volume || 0);
+        const peVolume = topContributors.map(d => d.details.PE_Volume || 0);
+
+        const ctx = document.getElementById('oiChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'CE Volume',
+                data: ceVolume,
+                backgroundColor: 'rgba(54, 162, 235, 0.7)'
+              },
+              {
+                label: 'PE Volume',
+                data: peVolume,
+                backgroundColor: 'rgba(255, 99, 132, 0.7)'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Volume Traded'
+                }
+              }
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Failed to load chart data:", error);
+      }
+    }
+
+    async function loadTopEntities() {
+      try {
+        const res = await fetch('http://127.0.0.1:5000/api/top-entities');
+        const data = await res.json();
+        const list = document.getElementById("entityList");
+        list.innerHTML = '';
+
+        // Use latest time window
+        const latestWindow = Object.keys(data).sort().pop();
+        const contributors = data[latestWindow];
+
+       contributors.forEach(c => {
+          const li = document.createElement("li");
+          const alertType = c.type || "Unknown Alert";
+          li.innerHTML = `
+            <div class="alert-type">${alertType}</div>
+            <div class="entity-label">${c.entity} — ₹${c.score}</div>
+          `;
+          list.appendChild(li);
+        });
+      } catch (error) {
+        console.error("Failed to load top contributors:", error);
+      }
+    }
+
+    loadChartData();
+    loadTopEntities();
+  </script>
+</body>
+</html>
