@@ -43,7 +43,7 @@
   <script>
     async function loadChartData() {
       try {
-        const res = await fetch('http://127.0.0.1:5000/api/alerts');
+        const res = await fetch('http://NSEOptionChainDashboard.up.railway.app/api/alerts');
         const data = await res.json();
 
         const topContributors = data.filter(item => item.type === 'Top OI Contributor');
@@ -89,7 +89,7 @@
 
     async function loadTopEntities() {
       try {
-        const res = await fetch('http://127.0.0.1:5000/api/top-entities');
+        const res = await fetch('http://NSEOptionChainDashboard.up.railway.app/api/top-entities');
         const data = await res.json();
         const list = document.getElementById("entityList");
         list.innerHTML = '';
