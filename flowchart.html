@@ -1,0 +1,103 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nifty Alert Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial; margin: 40px; }
+    canvas { max-width: 800px; }
+  </style>
+</head>
+<body>
+  <h2>Live Alert Chart (IV Spikes)</h2>
+  <canvas id="alertChart"></canvas>
+
+ <script>
+  async function loadData() {
+    try {
+      const res = await fetch('http://127.0.0.1:5000/api/alerts');
+      const data = await res.json();
+
+      console.log("📦 Raw data from /api/alerts:", data);
+
+      const topContributors = data
+        .filter(item => item.type === 'Top OI Contributor')
+        .filter(item => {
+          const d = item.details;
+          return (d?.CE_Volume || 0) > 0 || (d?.PE_Volume || 0) > 0;
+        });
+
+      if (topContributors.length === 0) {
+        document.getElementById("alertChart").outerHTML = "<p style='color:red; text-align:center'>⚠️ No data available to display chart.</p>";
+        return;
+      }
+
+      const labels = topContributors.map(d => d.details.Strike.toString());
+      const ceVolume = topContributors.map(d => d.details.CE_Volume || 0);
+      const peVolume = topContributors.map(d => d.details.PE_Volume || 0);
+
+      const ctx = document.getElementById('alertChart')?.getContext('2d');
+      if (!ctx) {
+        console.error("❌ Canvas with id 'oiChart' not found.");
+        return;
+      }
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'CE Volume',
+              data: ceVolume,
+              backgroundColor: 'rgba(54, 162, 235, 0.7)'
+            },
+            {
+              label: 'PE Volume',
+              data: peVolume,
+              backgroundColor: 'rgba(255, 99, 132, 0.7)'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Top OI Contributors (Volume)'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Volume'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Strike Price'
+              }
+            }
+          }
+        }
+      });
+
+    } catch (error) {
+      console.error("❌ Failed to fetch or render chart:", error);
+    }
+  }
+
+  loadData();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nifty IV Alerts Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .alert {
+      background-color: #fff;
+      border-left: 5px solid #2196F3;
+      margin: 10px auto;
+      padding: 15px;
+      width: 90%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .alert.unusual { border-color: #f44336; }
+    .alert.premium { border-color: #ff9800; }
+    .alert.oi { border-color: #4caf50; }
+    .timestamp {
+      font-size: 0.85em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>Nifty With Sensex</h1>
+  <div id="alerts"></div>
+
+  <script>
+    async function loadAlerts() {
+      const response = await fetch("http://127.0.0.1:5000/api/alerts"); // your Flask route
+      const alerts = await response.json();
+
+      const container = document.getElementById("alerts");
+      container.innerHTML = "";
+
+      alerts.forEach(alert => {
+        const div = document.createElement("div");
+        let alertClass = "";
+        if (alert.type.includes("IV")) alertClass = "unusual";
+        else if (alert.type.includes("Premium")) alertClass = "premium";
+        else alertClass = "oi";
+
+        div.className = `alert ${alertClass}`;
+        div.innerHTML = `
+          <strong>${alert.type}</strong><br/>
+          <span class="timestamp">${new Date(alert.timestamp).toLocaleString()}</span><br/>
+          <pre>${JSON.stringify(alert.details, null, 2)}</pre>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    loadAlerts();
+    setInterval(loadAlerts, 5000); // refresh every 5 seconds
+  </script>
+</body>
+</html>
