@@ -189,6 +189,5 @@ def get_alerts():
 
 if __name__ == '__main__':
 
-    exec(open("main.py").read())
-    exec(open("maincharts.py").read())
+    
     app.run()
