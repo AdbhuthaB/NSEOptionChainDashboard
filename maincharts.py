@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 
 # --- Flask API Config ---
-API_URL = "http://127.0.0.1:5000/api/alert"
+API_URL = "https://NSEOptionChainDashboard.up.railway.app/api/alert"
 
 # --- Fetch Option Chain Data from Cached JSON ---
 def load_cached_data(filename):

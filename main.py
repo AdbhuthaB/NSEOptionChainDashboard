@@ -3,12 +3,12 @@ import json
 from datetime import datetime
 
 # --- Flask API Config ---
-API_URL = "http://127.0.0.1:5000/api/alert"
+API_URL = "https://NSEOptionChainDashboard.up.railway.app/api/alert"
 
 # --- Fetch Option Chain Data from Cached JSON ---
 def fetch_option_chain():
     try:
-        with open("nifty13.json", "r") as f:
+        with open("nifty_snapshot_2025-07-14_12-24.json", "r") as f:
             data = json.load(f)
             return data
     except Exception as e:

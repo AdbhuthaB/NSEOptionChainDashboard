@@ -7,6 +7,8 @@ from collections import defaultdict
 from scipy.stats import norm
 import main
 import maincharts
+import os
+port = int(os.environ.get("PORT", 5000))
 app = Flask(__name__)
 CORS(app)  # Allow requests from frontend
 
@@ -186,6 +188,7 @@ def get_alerts():
         return jsonify(alerts_list), 200
 
 if __name__ == '__main__':
+
     exec(open("main.py").read())
     exec(open("maincharts.py").read())
-    app.run(debug=True)
+    app.run()
